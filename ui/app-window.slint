@@ -1,17 +1,188 @@
-import { Button, VerticalBox } from "std-widgets.slint";
+import { ScrollView } from "std-widgets.slint";
 
-export component AppWindow inherits Window {
-    in-out property <int> counter: 42;
-    callback request-increase-value();
-    VerticalBox {
-        Text {
-            text: "Counter: \{root.counter}";
+export struct Terminal {
+    address: string,
+    name: string,
+    agent: string,
+    cwd: string,
+    state: string,
+    status: string,
+    turn: int,
+}
+
+component TerminalRow inherits Rectangle {
+    in property <Terminal> t;
+    pure function status-color(status: string) -> color {
+        if (status == "working") { return #e0af68; }
+        if (status == "done") { return #9ece6a; }
+        if (status == "blocked") { return #ff9e64; }
+        if (status == "error") { return #f7768e; }
+        return #565f89; // idle / unknown
+    }
+
+    height: 54px;
+    background: transparent;
+
+    HorizontalLayout {
+        padding-left: 14px;
+        padding-right: 14px;
+        spacing: 10px;
+
+        // status dot
+        Rectangle {
+            width: 8px;
+            height: 8px;
+            y: (parent.height - self.height) / 2;
+            border-radius: 4px;
+            background: status-color(t.status);
         }
 
-        Button {
-            text: "Increase value";
-            clicked => {
-                root.request-increase-value();
+        VerticalLayout {
+            spacing: 2px;
+            alignment: center;
+
+            HorizontalLayout {
+                spacing: 8px;
+                Text {
+                    text: t.name == "" ? t.address : t.name;
+                    font-size: 13px;
+                    font-weight: 600;
+                    color: #c0caf5;
+                    overflow: elide;
+                    horizontal-stretch: 1;
+                }
+                Text {
+                    text: t.address;
+                    font-size: 11px;
+                    color: #565f89;
+                    vertical-alignment: center;
+                }
+            }
+
+            HorizontalLayout {
+                spacing: 8px;
+                Text {
+                    text: t.cwd;
+                    font-size: 10px;
+                    color: #565f89;
+                    overflow: elide;
+                    horizontal-stretch: 1;
+                }
+                Text {
+                    text: t.agent == "" ? t.status : t.agent + " · " + t.status;
+                    font-size: 10px;
+                    color: #7aa2f7;
+                    vertical-alignment: center;
+                }
+            }
+        }
+    }
+}
+
+export component AppWindow inherits Window {
+    title: "hc";
+    width: 360px;
+    height: 420px;
+    background: #1a1b26;
+    no-frame: false;
+    always-on-top: true;
+
+    in property <[Terminal]> terminals;
+    in property <string> summary: "…";
+    in property <string> updated: "";
+    in property <bool> hc-error: false;
+
+    callback refresh();
+
+    VerticalLayout {
+        // header
+        Rectangle {
+            height: 44px;
+            background: transparent;
+            HorizontalLayout {
+                padding-left: 14px;
+                padding-right: 10px;
+                alignment: space-between;
+
+                Text {
+                    text: "hc · terminals";
+                    font-size: 12px;
+                    font-weight: 700;
+                    color: #a9b1d6;
+                    vertical-alignment: center;
+                    letter-spacing: 1px;
+                }
+                TouchArea {
+                    width: 28px;
+                    height: 28px;
+                    clicked => { root.refresh(); }
+                    Rectangle {
+                        border-radius: 6px;
+                        background: parent.has-hover ? #24283b : transparent;
+                        Text {
+                            text: "↻";
+                            font-size: 15px;
+                            color: #a9b1d6;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                        }
+                    }
+                }
+            }
+        }
+
+        Rectangle { height: 1px; background: #24283b; }
+
+        // body
+        if root.hc-error : Rectangle {
+            vertical-stretch: 1;
+            Text {
+                text: "hc not available";
+                color: #f7768e;
+                font-size: 12px;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+        }
+        if !root.hc-error && root.terminals.length == 0 : Rectangle {
+            vertical-stretch: 1;
+            Text {
+                text: "no live terminals";
+                color: #565f89;
+                font-size: 12px;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+        }
+        if !root.hc-error && root.terminals.length > 0 : ScrollView {
+            vertical-stretch: 1;
+            VerticalLayout {
+                alignment: start;
+                for t in root.terminals : TerminalRow { t: t; }
+            }
+        }
+
+        // footer
+        Rectangle { height: 1px; background: #24283b; }
+        Rectangle {
+            height: 30px;
+            background: transparent;
+            HorizontalLayout {
+                padding-left: 14px;
+                padding-right: 14px;
+                alignment: space-between;
+                Text {
+                    text: root.summary;
+                    font-size: 10px;
+                    color: #565f89;
+                    vertical-alignment: center;
+                }
+                Text {
+                    text: root.updated;
+                    font-size: 10px;
+                    color: #3b4261;
+                    vertical-alignment: center;
+                }
             }
         }
     }
