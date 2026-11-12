@@ -1655,16 +1655,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hc-widget"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "serde_json",
- "slint",
- "slint-build",
-]
-
-[[package]]
 name = "heck"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3278,6 +3268,16 @@ dependencies = [
  "fixedbitset",
  "hashbrown 0.15.5",
  "indexmap",
+]
+
+[[package]]
+name = "phect"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "serde_json",
+ "slint",
+ "slint-build",
 ]
 
 [[package]]

@@ -1,4 +1,4 @@
-# hc-widget
+# PhEcT
 
 A tiny, minimalist always-on-top desktop widget that shows live [`hc`](https://herdr-core) terminals at a glance.
 

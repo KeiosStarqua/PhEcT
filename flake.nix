@@ -1,5 +1,5 @@
 {
-  description = "hc-widget - a tiny minimalist widget showing live hc terminals";
+  description = "PhEcT - a tiny minimalist widget showing live hc terminals";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
@@ -25,17 +25,17 @@
         let
           pkgs = import nixpkgs { inherit system; };
           desktopItem = pkgs.makeDesktopItem {
-            name = "hc-widget";
-            desktopName = "hc Terminals";
+            name = "phect";
+            desktopName = "PhEcT";
             comment = "Live hc terminals at a glance";
-            exec = "hc-widget";
+            exec = "phect";
             icon = "utilities-system-monitor";
             categories = [ "Utility" "Monitor" ];
             terminal = false;
           };
         in {
           default = pkgs.rustPlatform.buildRustPackage {
-            pname = "hc-widget";
+            pname = "phect";
             version = "0.1.0";
 
             # Keep the flake source limited to what the build needs.
@@ -53,21 +53,21 @@
             buildInputs = nativeLibs pkgs;
 
             postInstall = ''
-              install -Dm644 ${desktopItem}/share/applications/hc-widget.desktop \
-                $out/share/applications/hc-widget.desktop
+              install -Dm644 ${desktopItem}/share/applications/phect.desktop \
+                $out/share/applications/phect.desktop
             '';
 
             # Winit dlopens wayland/xkbcommon at runtime; point the wrapped binary at them.
             postFixup = ''
-              wrapProgram $out/bin/hc-widget \
+              wrapProgram $out/bin/phect \
                 --prefix LD_LIBRARY_PATH : ${pkgs.lib.makeLibraryPath (nativeLibs pkgs)}
             '';
 
             meta = with pkgs.lib; {
-              description = "Tiny minimalist always-on-top widget showing live hc terminals";
-              mainProgram = "hc-widget";
+              description = "PhEcT - tiny minimalist always-on-top widget showing live hc terminals";
+              mainProgram = "phect";
               platforms = platforms.linux;
-              desktopFile = "${desktopItem}/share/applications/hc-widget.desktop";
+              desktopFile = "${desktopItem}/share/applications/phect.desktop";
             };
           };
         });
